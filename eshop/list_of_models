@@ -1,0 +1,40 @@
+category:
+	title
+	logo
+	ismain
+
+Sizes:
+	title
+
+Colors:
+	title
+
+Product:
+	title
+	reviews
+	rating
+	old_price
+	new_price
+	short_description
+	sizes
+	colors
+	description
+	details
+	logo {main}
+	discount- 0 %
+	is_new - 0 1
+	is_best_seller
+
+
+Product Images:
+	product
+	title
+	image
+
+CommentItem:
+	product
+	text
+	author_name
+	author_email
+	rating
+	pub_date
