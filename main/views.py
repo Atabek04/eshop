@@ -1,12 +1,31 @@
 from django.shortcuts import render
 from main.models import *
+from django.http import JsonResponse
 
 
 def indexHandler(request):
 	categories = Category.objects.all()
+	open_carts = Cart.objects.filter(session_id = request.session.session_key).filter(status=0)
+
+	cart = {
+		'info': {},
+		'product_count':0,
+		'products': [],
+		'price':0
+	}
+
+	if open_carts:
+		open_carts = open_carts[0]
+		cart_items = CartItem.objects.filter(cart__id = open_carts.id).filter(status=0)
+		cart['info'] = open_carts
+		if cart_items:
+			cart['product_count'] = len(cart_items)
+			cart['products'] = cart_items
+
 
 	context = {
 		'categories':categories,
+		'cart':cart,
 	}	
 	return render(request, 'index.html', context)
 
@@ -33,6 +52,22 @@ def productsHandler(request):
 		else:
 			products = Product.objects.all()
 
+	cart = {
+		'info': {},
+		'product_count':0,
+		'products': [],
+		'price':0
+	}
+	open_carts = Cart.objects.filter(session_id = request.session.session_key).filter(status=0)
+	if open_carts:
+		open_carts = open_carts[0]
+		cart_items = CartItem.objects.filter(cart__id = open_carts.id).filter(status=0)
+		cart['info'] = open_carts
+		if cart_items:
+			cart['product_count'] = len(cart_items)
+			cart['products'] = cart_items
+
+
 
 	results = len(products)
 	context = {
@@ -40,7 +75,8 @@ def productsHandler(request):
 		'categories':categories,
 		'active_category':active_category,
 		'results':results,
-		'search_value':search_value
+		'search_value':search_value,
+		'cart':cart
 	}
 	return render(request, 'products.html', context)
 
@@ -90,6 +126,21 @@ def productHandler(request, product_id):
 		rating_4_progress = int((rating_4/comments_len)*100)
 		rating_5_progress = int((rating_5/comments_len)*100)
 
+	cart = {
+		'info': {},
+		'product_count':0,
+		'products': [],
+		'price':0
+	}
+	open_carts = Cart.objects.filter(session_id = request.session.session_key).filter(status=0)
+	if open_carts:
+		open_carts = open_carts[0]
+		cart_items = CartItem.objects.filter(cart__id = open_carts.id).filter(status=0)
+		cart['info'] = open_carts
+		if cart_items:
+			cart['product_count'] = len(cart_items)
+			cart['products'] = cart_items
+
 
 	context = {
 		'product':product,
@@ -108,6 +159,68 @@ def productHandler(request, product_id):
 		"rating_3_progress":rating_3_progress,
 		"rating_4_progress":rating_4_progress,
 		"rating_5_progress":rating_5_progress,
+		'cart':cart
 
 	}
 	return render(request, 'product.html', context)
+
+
+def cartHandler(request):
+	if request.method == 'POST':
+		action = request.POST.get('action','')
+		if action == 'add_to_cart':
+			new_cart = None
+			product_id = int(request.POST.get('product_id', 0))
+			amount = int(request.POST.get('amount', 0))
+			open_carts = Cart.objects.filter(session_id = request.session.session_key).filter(status=0)
+			if not open_carts:
+				new_cart = Cart()
+				new_cart.session_id = request.session.session_key
+				new_cart.save()
+			else:
+				new_cart = open_carts[0]
+
+			cart_items = CartItem.objects.filter(cart__id = new_cart.id).filter(product__id=product_id).filter(status=0)
+			if cart_items:
+				new_cart_item = cart_items[0]
+				new_cart_item.amount += amount
+				new_cart_item.save()
+			else:
+				new_cart_item = CartItem()
+				new_cart_item.product = Product.objects.get(id=product_id)
+				new_cart_item.cart = Cart.objects.get(id=new_cart.id)
+				new_cart_item.amount = amount
+				new_cart_item.product_price = new_cart_item.product.new_price
+				new_cart_item.save()
+
+		elif action == 'remove_from_cart':
+			product_id = int(request.POST.get('product_id', 0))
+			open_carts = Cart.objects.filter(session_id = request.session.session_key).filter(status=0)
+			if open_carts:
+				new_cart = open_carts[0]
+			elif new_cart:
+				cart_items = CartItem.objects.filter(cart__id = new_cart.id).filter(product__id = product_id).filter(status=0)
+				for ci in cart_items:
+					ci.status = -1
+					ci.save()
+
+		if action in ['add_to_cart', 'remove_from_cart']:
+			open_carts = Cart.objects.filter(session_id = request.session.session_key).filter(status=0)
+			if open_carts:
+				new_cart = open_carts[0]
+				cart_items = CartItem.objects.filter(cart__id = new_cart.id).filter(product__id = product_id).filter(status=0)
+				all_summ = 0
+				items_count = 0
+				for ci in cart_items:
+					all_summ += ci.amount * ci.product_price
+					items_count +=ci.amount
+				new_cart.orig_price = all_summ
+				new_cart.price = all_summ
+				new_cart.amount = items_count
+				new_cart.save()
+ 
+
+		return JsonResponse({'success':True, 'success':True})
+	return render(request, 'cart.html', {
+		'cart':cart 
+		})

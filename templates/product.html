@@ -18,6 +18,7 @@
 						</ul>
 					</div>
 				</div>
+				{% endfor %}
 				<!-- /row -->
 			</div>
 			<!-- /container -->
@@ -33,15 +34,11 @@
 					<!-- Product main img -->
 					<div class="col-md-5 col-md-push-2">
 						<div id="product-main-img">
+							{% for prod in product %}
 							<div class="product-preview">
 								<img src="/media/{{prod.logo}}" alt="">
 							</div>
 							{% endfor %}
-							<!-- {% for prod in prod_img %}
-							<div class="product-preview">
-								<img src="/media/{{prod.image}}" alt="">
-							</div>
-							{% endfor %} -->
 						</div>
 					</div>
 					<!-- /Product main img -->
@@ -49,9 +46,11 @@
 					<!-- Product thumb imgs -->
 					<div class="col-md-2  col-md-pull-5">
 						<div id="product-imgs">
+							{% for prod in prod_img %}
 							<div class="product-preview">
-								<img src="/media/{{prod.logo}}" alt="">
+								<img src="/media/{{prod.image}}" alt="">
 							</div>
+							{% endfor %}
 							{% for prod in prod_img %}
 							<div class="product-preview">
 								<img src="/media/{{prod.image}}" alt="">
@@ -108,16 +107,18 @@
 								</label>
 							</div>
 
-							<div class="add-to-cart">
+							<div class="js-container add-to-cart">
+								{% csrf_token %}
 								<div class="qty-label">
 									Qty
 									<div class="input-number">
-										<input type="number">
+										<input type="hidden" name="product_id" value="{{product.id}}">
+										<input type="number" name="amount" value="1">
 										<span class="qty-up">+</span>
 										<span class="qty-down">-</span>
 									</div>
 								</div>
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+								<button class="js-add-to-cart add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
 							</div>
 
 							<ul class="product-btns">
@@ -354,7 +355,7 @@
 					<div class="col-md-3 col-xs-6">
 						<div class="product">
 							<div class="product-img">
-								<img src="./img/product01.png" alt="">
+								<img src="/media/img/product01.png" alt="">
 								<div class="product-label">
 									<span class="sale">-30%</span>
 								</div>
@@ -382,7 +383,7 @@
 					<div class="col-md-3 col-xs-6">
 						<div class="product">
 							<div class="product-img">
-								<img src="./img/product02.png" alt="">
+								<img src="/media/img/product02.png" alt="">
 								<div class="product-label">
 									<span class="new">NEW</span>
 								</div>
@@ -417,7 +418,7 @@
 					<div class="col-md-3 col-xs-6">
 						<div class="product">
 							<div class="product-img">
-								<img src="./img/product03.png" alt="">
+								<img src="/media/img/product03.png" alt="">
 							</div>
 							<div class="product-body">
 								<p class="product-category">Category</p>
@@ -447,7 +448,7 @@
 					<div class="col-md-3 col-xs-6">
 						<div class="product">
 							<div class="product-img">
-								<img src="./img/product04.png" alt="">
+								<img src="/media/img/product04.png" alt="">
 							</div>
 							<div class="product-body">
 								<p class="product-category">Category</p>
@@ -474,4 +475,34 @@
 			<!-- /container -->
 		</div>
 		<!-- /Section -->
+
+<script>
+	jQuery('.js-add-to-cart').click(function(){
+		var  amount = jQuery(this).parents('.js-container').find('[name="amount"]').val();
+		var product_id = jQuery(this).parents('.js-container').find('[name="product_id"]').val();
+		var csrfmiddlewaretoken = jQuery(this).parents('.js-container').find('[name="csrfmiddlewaretoken"]').val();
+		var oData = {
+			'amount':amount,
+			'product_id':product_id,
+			'action': 'add_to_cart',
+			'csrfmiddlewaretoken':csrfmiddlewaretoken,
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url : '/cart',
+			datatype: 'json',
+			data: oData,
+			success: function(){
+				alert("Успешно добавлено")
+				location.reload();
+			}
+		})
+
+		return false;
+})
+</script>
+
+
+
+
 {% endblock content %}

@@ -50,3 +50,16 @@ admin.site.register(CommentItem, CommentItemAdmin)
 
 
 # ----------------------------------------------
+class CartAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(Cart, CartAdmin)
+
+
+
+# ----------------------------------------------
+class CartItemAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(CartItem, CartItemAdmin)
