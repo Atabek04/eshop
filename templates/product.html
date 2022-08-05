@@ -2,6 +2,7 @@
 
 
 {% block content %}
+
     		<!-- BREADCRUMB -->
 		<div id="breadcrumb" class="section">
 			<!-- container -->
@@ -355,7 +356,7 @@
 					<div class="col-md-3 col-xs-6">
 						<div class="product">
 							<div class="product-img">
-								<img src="/media/img/product01.png" alt="">
+								<img src="//media/img/product01.png" alt="">
 								<div class="product-label">
 									<span class="sale">-30%</span>
 								</div>
@@ -477,6 +478,8 @@
 		<!-- /Section -->
 
 <script>
+
+
 	jQuery('.js-add-to-cart').click(function(){
 		var  amount = jQuery(this).parents('.js-container').find('[name="amount"]').val();
 		var product_id = jQuery(this).parents('.js-container').find('[name="product_id"]').val();
@@ -487,9 +490,10 @@
 			'action': 'add_to_cart',
 			'csrfmiddlewaretoken':csrfmiddlewaretoken,
 		}
+		
 		jQuery.ajax({
 			type: 'POST',
-			url : '/cart',
+			url : '/cart/',
 			datatype: 'json',
 			data: oData,
 			success: function(){

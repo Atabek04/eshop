@@ -1,5 +1,3 @@
-console.log("Hello World")
-
 (function($) {
 	"use strict"
 

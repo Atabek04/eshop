@@ -95,7 +95,7 @@
 									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
 										<i class="fa fa-shopping-cart"></i>
 										<span>Your Cart</span>
-										<div class="qty">{% if cart and cart.info %} {{cart.info.produt_count}} {% else %}0{% endif %}</div>
+										<div class="qty">{% if cart and cart.info %} {{cart.info.product_count}} {% else %}0{% endif %}</div>
 									</a>
 									{% if cart and cart.products %}
 									<div class="cart-dropdown">
@@ -103,7 +103,7 @@
 											{% for pro in cart.products %}
 											<div class="product-widget">
 												<div class="product-img">
-													<img src="./img/product01.png" alt="">
+													<img src="/media/img/product01.png" alt="">
 												</div>
 												<div class="product-body">
 													<h3 class="product-name"><a href="#"> {{pro.product.title}} </a></h3>
