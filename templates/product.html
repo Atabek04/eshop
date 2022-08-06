@@ -112,8 +112,13 @@
 								{% csrf_token %}
 								<div class="qty-label">
 									Qty
+									
 									<div class="input-number">
-										<input type="hidden" name="product_id" {% for prod in product %} value="{{prod.id}}"  {% endfor %}>
+										
+										<input type="hidden" name="product_id" {% for prod in product %} value="{{prod.id}}" {% endfor %}>
+										
+
+
 										<input type="number" name="amount" value="1">
 										<span class="qty-up">+</span>
 										<span class="qty-down">-</span>
