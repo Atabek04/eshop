@@ -2,14 +2,13 @@ from math import prod
 from django.shortcuts import render
 from main.models import *
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
 
 
 
 
 def indexHandler(request):
     categories = Category.objects.all()
-    open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
 
     cart = {
         'info': {},
@@ -18,10 +17,11 @@ def indexHandler(request):
         'price': 0
     }
 
+    open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
     if open_carts:
-        open_carts = open_carts[0]
-        cart_items = CartItem.objects.filter(cart__id=open_carts.id).filter(status=0)
-        cart['info'] = open_carts
+        open_cart = open_carts[0]
+        cart_items = CartItem.objects.filter(cart__id=open_cart.id).filter(status=0)
+        cart['info'] = open_cart
         if cart_items:
             cart['product_count'] = len(cart_items)
             cart['products'] = cart_items
@@ -52,6 +52,7 @@ def productsHandler(request):
             products = Product.objects.filter(title__contains=search_value)
         else:
             products = Product.objects.all()
+    results = len(products)
 
     cart = {
         'info': {},
@@ -59,16 +60,18 @@ def productsHandler(request):
         'products': [],
         'price': 0
     }
+
     open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
+
     if open_carts:
-        open_carts = open_carts[0]
-        cart_items = CartItem.objects.filter(cart__id=open_carts.id).filter(status=0)
-        cart['info'] = open_carts
+        open_cart = open_carts[0]
+        cart_items = CartItem.objects.filter(cart__id=open_cart.id).filter(status=0)
+        cart['info'] = open_cart
         if cart_items:
             cart['product_count'] = len(cart_items)
             cart['products'] = cart_items
 
-    results = len(products)
+    
     context = {
         'products': products,
         'categories': categories,
@@ -132,11 +135,10 @@ def productHandler(request, product_id):
     }
     open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
     if open_carts:
-        open_carts = open_carts[0]
-        cart_items = CartItem.objects.filter(cart__id=open_carts.id).filter(status=0)
-        cart['info'] = open_carts
+        open_cart = open_carts[0]
+        cart_items = CartItem.objects.filter(cart__id=open_cart.id).filter(status=0)
+        cart['info'] = open_cart
         if cart_items:
-            cart['product_count'] = len(cart_items)
             cart['products'] = cart_items
 
     context = {
@@ -161,7 +163,7 @@ def productHandler(request, product_id):
     }
     return render(request, 'product.html', context)
 
-@csrf_exempt
+
 def cartHandler(request):
     if request.method == 'POST':
         action = request.POST.get('action', '')
@@ -169,15 +171,15 @@ def cartHandler(request):
         
             new_cart = None
 
-            # product_id = int(request.GET.get('product_id', 0))
-            if request.POST.get('product_id') !='':
-                product_id = int(request.GET.get('product_id'))
-            else:
-                product_id = 1
+            product_id = int(request.GET.get('product_id', 0))
+            # if request.POST.get('product_id') !='':
+            #     product_id = int(request.GET.get('product_id'))
+            # else:
+            #     product_id = 0
             
             print('*'*100)
-            print(type(request.POST.get('product_id')))
-            print(product_id)
+            print(type(request.POST.get('')))
+            print(request.GET.get('product_id'))
 
             amount = int(request.POST.get('amount', 0))
             open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
