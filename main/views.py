@@ -1,5 +1,7 @@
 from math import prod
 from django.shortcuts import render
+from django.shortcuts import redirect
+from django.contrib.auth.models import User
 from main.models import *
 from django.http import JsonResponse
 
@@ -163,24 +165,15 @@ def productHandler(request, product_id):
     }
     return render(request, 'product.html', context)
 
-
 def cartHandler(request):
     if request.method == 'POST':
-        action = request.POST.get('action', '')
+        action = request.POST.get('action','')
         if action == 'add_to_cart':
-        
-            new_cart = None
-
-            product_id = int(request.GET.get('product_id', 0))
-            # if request.POST.get('product_id') !='':
-            #     product_id = int(request.GET.get('product_id'))
-            # else:
-            #     product_id = 0
-            
-            print('*'*100)
-            print(type(request.POST.get('')))
-            print(request.GET.get('product_id'))
-
+            # product_id = int(request.POST.get('product_id', 0))
+            if request.POST.get('product_id') != '':
+                product_id = int(request.POST.get('product_id'))
+            else:
+                product_id = 0
             amount = int(request.POST.get('amount', 0))
             open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
             if not open_carts:
@@ -208,31 +201,58 @@ def cartHandler(request):
             open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
             if open_carts:
                 new_cart = open_carts[0]
-            elif new_cart:
-                cart_items = CartItem.objects.filter(cart__id=new_cart.id).filter(product__id=product_id).filter(
-                    status=0)
+            if new_cart:
+                cart_items = CartItem.objects.filter(cart__id=new_cart.id).filter(product__id=product_id)
                 for ci in cart_items:
                     ci.status = -1
                     ci.save()
+
+        elif action == 'checkout':
+            open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
+            if open_carts:
+                new_cart = open_carts[0]
+                new_cart.last_name = request.POST.get('last_name', '')
+                new_cart.first_name = request.POST.get('first_name', '')
+                new_cart.email = request.POST.get('email', '')
+                new_cart.address = request.POST.get('city', '')
+                new_cart.city = request.POST.get('city', '')
+                new_cart.country = request.POST.get('country', '')
+                new_cart.zip_code = request.POST.get('zip_code', '')
+                new_cart.phone = request.POST.get('phone', '')
+
+                new_cart.status = 1
+                new_cart.save()
+
 
         if action in ['add_to_cart', 'remove_from_cart']:
             open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
             if open_carts:
                 new_cart = open_carts[0]
-                cart_items = CartItem.objects.filter(cart__id=new_cart.id).filter(product__id=product_id).filter(
-                    status=0)
-                all_summ = 0
+                cart_items = CartItem.objects.filter(cart__id=new_cart.id).filter(status=0)
+
+                all_sum = 0
                 items_count = 0
                 for ci in cart_items:
-                    all_summ += ci.amount * ci.product_price
+                    all_sum += ci.amount * ci.product_price
                     items_count += ci.amount
-                new_cart.orig_price = all_summ
-                new_cart.price = all_summ
+                new_cart.orig_price = all_sum
+                new_cart.price = all_sum
                 new_cart.amount = items_count
                 new_cart.save()
-    
 
-    return JsonResponse({'success': True, 'success': True})
+        return JsonResponse({'success':True, '_success':True})
+
+    else:
+        cart = {}
+        cart_items = []
+
+        open_carts = Cart.objects.filter(session_id=request.session.session_key).filter(status=0)
+        if open_carts:
+            open_cart = open_carts[0]
+            cart_items = CartItem.objects.filter(cart__id=open_cart.id).filter(status=0)
+            cart = open_cart
+
     return render(request, 'cart.html', {
-        'cart': cart
-    })
+        'cart': cart,
+        'cart_items': cart_items,
+        })
