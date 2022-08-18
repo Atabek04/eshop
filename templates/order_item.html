@@ -1,0 +1,19 @@
+{% extends 'main.html' %}
+{% block content %}
+    <table border="1" style="margin:0 auto">
+        <tr>
+            <th>Названия</th>
+            <th>Количества</th>
+            <th>Цена</th>
+
+        </tr>
+        {% for oi in order_items %}
+            <tr>
+                <td>{{ oi.product.title }}</td>
+                <td>{{ oi.amount }}</td>
+                <td>{{ oi.product_price }}</td>
+
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

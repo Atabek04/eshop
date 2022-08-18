@@ -1,0 +1,19 @@
+{% extends 'main.html' %}
+
+{% block content %}
+    <table border="1" style="margin:0 auto">
+        <tr>
+            <th>ID</th>
+            <th>ФИО</th>
+            <th>Подробная</th>
+
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.last_name }} {{ order.first_name }}</td>
+            <td><a href="/orders/{{ order.id }}">Открыть</a></td
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

@@ -69,9 +69,15 @@ class CommentItem(models.Model):
 
 class Cart(models.Model):
     title = models.CharField(max_length=300, blank=True, default='')
+    email = models.CharField(max_length=200, blank=True, default='')
+    last_name = models.CharField(max_length=200, blank=True, default='')
+    first_name = models.CharField(max_length=200, blank=True, default='')
+    zip_code = models.CharField(max_length=200, blank=True, default='')
+    country = models.CharField(max_length=200, blank=True, default='')
+    city = models.CharField(max_length=200, blank=True, default='')
     person = models.CharField(max_length=200, blank=True, default='')
     phone = models.CharField(max_length=200, blank=True, default='')
-    adress = models.CharField(max_length=200, blank=True, default='')
+    address = models.CharField(max_length=200, blank=True, default='')
     payed = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
     session_id = models.CharField(max_length=300, blank=True, null=True ,default='')
@@ -79,6 +85,8 @@ class Cart(models.Model):
     discount = models.FloatField(default=0)
     orig_price = models.FloatField(default=0)
     price = models.FloatField(default=0)
+    is_accepted = models.BooleanField(default=False)
+    
 
     def __str__(self):
         return self.session_id

@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -30,6 +31,8 @@
 		<![endif]-->
 	</head>
 	<body>
+		{% load tags-library %}
+		{% csrf_token %}
 		<!-- HEADER -->
 		<header>
 			<!-- TOP HEADER -->
@@ -71,7 +74,7 @@
 										{% for category in categories %}
 											<option {% if active_category and active_category == category.id %} selected="selected" {% endif %} value="{{category.id}}">{{category.title}}</option>
 										{% endfor %}
-									</select>
+									</	select>
 									<input class="input" name="q" placeholder="Search here" value="{{search_value}}">
 									<button class="search-btn">Search</button>
 								</form>
@@ -95,31 +98,31 @@
 									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
 										<i class="fa fa-shopping-cart"></i>
 										<span>Your Cart</span>
-										<div class="qty">{% if cart and cart.info %} {{cart.info.amount}} {% else %}0{% endif %}</div>
+										<div class="qty">{% if cart %} {{cart.amount | to_int}} {% else %}0{% endif %}</div>
 									</a>
-									{% if cart and cart.products %}
+									{% if cart_items %}
 									<div class="cart-dropdown">
 										<div class="cart-list">
-											{% for pro in cart.products %}
+											{% for ci in cart_items %}
 											<div class="product-widget">
 												<div class="product-img">
-													<img src="/media/img/product01.png" alt="">
+													<img src="/media/{{ci.product.logo}}" alt="">
 												</div>
 												<div class="product-body">
-													<h3 class="product-name"><a href="#"> {{pro.product.title}} </a></h3>
-													<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+													<h3 class="product-name"><a href="#"> {{ci.product.title}} </a></h3>
+													<h4 class="product-price"><span class="qty">{{ci.amount | to_int }}x</span>{{ci.product_price | to_money}}</h4>
 												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
+												<button data-id="{{ci.product.id}}" class="js-delete-item delete"><i class="fa fa-close"></i></button>
 											</div>
 											{% endfor %}
 										</div>
 										<div class="cart-summary">
-											<small>3 Item(s) selected</small>
-											<h5>SUBTOTAL: $2940.00</h5>
+											<small>{{cart.amount | to_int }} Item(s) selected</small>
+											<h5>SUBTOTAL: {{cart.orig_price | to_int | to_money }}</h5>
 										</div>
 										<div class="cart-btns">
 											<a href="#">View Cart</a>
-											<a href="#">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
+										<a href="{% url 'cart' %}">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
 										</div>
 									</div>
 									{% endif %}
@@ -156,6 +159,9 @@
 						{% for category in categories %}
 							<li {% if active_category and active_category.id == category.id %} class="active" {% endif %}><a href="/products/?category_id={{category.id}}">{{category.title}}</a></li>
 						{% endfor %}
+						{% if user.is_authenticated %}
+							<li><a href="{% url 'orders' %}">Orders</a></li>
+						{% endif %}
 					</ul>
 					<!-- /NAV -->
 				</div>
@@ -300,5 +306,84 @@
 		<script src="{% static 'js/nouislider.min.js' %}"></script>
 		<script src="{% static 'js/jquery.zoom.min.js' %}"></script>
 		<script src="{% static 'js/main.js' %}"></script>
+		<script>
+			jQuery('.js-add-to-cart').click(function(){
+				var  amount = jQuery(this).parents('.js-container').find('[name="amount"]').val();
+				var product_id = jQuery(this).parents('.js-container').find('[name="product_id"]').val();
+				var csrfmiddlewaretoken = jQuery('[name="csrfmiddlewaretoken"]').val();
+				var oData = {
+					'amount':amount,
+					'product_id':product_id,
+					'action': 'add_to_cart',
+					'csrfmiddlewaretoken':csrfmiddlewaretoken,
+				}
+				
+				jQuery.ajax({
+					type: 'POST',
+					url : '/cart',
+					datatype: 'json',
+					data: oData,
+					success: function(){
+						alert("Успешно добавлено")
+						location.reload();
+					}
+				})
+
+				return false;
+			})
+			
+			$('.js-delete-item').click(function(){
+				var csrfmiddlewaretoken = $('[name="csrfmiddlewaretoken"]').val();
+				var product_id = $(this).data('id');
+				var oData = {
+					'product_id':product_id,
+					'action': 'remove_from_cart',
+					'csrfmiddlewaretoken':csrfmiddlewaretoken,
+				}
+				
+				jQuery.ajax({
+					type: 'POST',
+					url : '/cart',
+					datatype: 'json',
+					data: oData,
+					success: function(){
+						alert("Успешно удалено")
+						location.reload();
+					}
+				})
+				return false;
+				
+			})
+
+			$('.js-checkout').click(function(){
+				var csrfmiddlewaretoken = $('body').find('[name="csrfmiddlewaretoken"]').val();
+				var oData = {
+					'first_name': $('[name="first_name"]').val(),
+					'last_name': $('[name="last_name"]').val(),
+					'email': $('[name="email"]').val(),
+					'address': $('[name="address"]').val(),
+					'city': $('[name="city"]').val(),
+					'country': $('[name="country"]').val(),
+					'zip_code': $('[name="zip_code"]').val(),
+					'phone': $('[name="phone"]').val(),
+
+					'action': 'checkout',
+					'csrfmiddlewaretoken': csrfmiddlewaretoken
+				}
+
+				$.ajax({
+					type: 'POST',
+					url: '/cart',
+					datatype: 'json',
+					data:oData,
+					success:function(){
+						alert('Успешно отправлено')
+						location.reload()
+					}
+				})
+
+				return false;
+			})
+		</script>
 	</body>
 </html>

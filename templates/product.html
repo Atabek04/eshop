@@ -109,7 +109,6 @@
 							</div>
 
 							<div class="js-container add-to-cart">
-								{% csrf_token %}
 								<div class="qty-label">
 									Qty
 									
@@ -488,7 +487,7 @@
 	jQuery('.js-add-to-cart').click(function(){
 		var  amount = jQuery(this).parents('.js-container').find('[name="amount"]').val();
 		var product_id = jQuery(this).parents('.js-container').find('[name="product_id"]').val();
-		var csrfmiddlewaretoken = jQuery(this).parents('.js-container').find('[name="csrfmiddlewaretoken"]').val();
+		var csrfmiddlewaretoken = jQuery('[name="csrfmiddlewaretoken"]').val();
 		var oData = {
 			'amount':amount,
 			'product_id':product_id,

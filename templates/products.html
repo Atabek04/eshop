@@ -1,4 +1,6 @@
-{% extends "main.html" %} {% block content %}
+{% extends 'main.html' %} 
+{% load tags-library %}
+{% block content %}
 <!-- BREADCRUMB -->
 <div id="breadcrumb" class="section">
   <!-- container -->
@@ -133,7 +135,7 @@
           <h3 class="aside-title">Top selling</h3>
           <div class="product-widget">
             <div class="product-img">
-              <img src="./media/img/product01.png" alt="" />
+              <img src="/media/img/product01.png" alt="" />
             </div>
             <div class="product-body">
               <p class="product-category">Category</p>
@@ -148,7 +150,7 @@
 
           <div class="product-widget">
             <div class="product-img">
-              <img src="./img/product02.png" alt="" />
+              <img src="/media/img/product02.png" alt="" />
             </div>
             <div class="product-body">
               <p class="product-category">Category</p>
@@ -163,7 +165,7 @@
 
           <div class="product-widget">
             <div class="product-img">
-              <img src="./img/product03.png" alt="" />
+              <img src="/media/img/product03.png" alt="" />
             </div>
             <div class="product-body">
               <p class="product-category">Category</p>
@@ -228,7 +230,7 @@
                   <a href="/products/{{product.id}}">{{product.title}}</a>
                 </h3>
                 <h4 class="product-price">
-                  ${{product.new_price}} <del class="product-old-price">${{product.old_price}}</del>
+                  {{product.new_price | to_money}} <del class="product-old-price">{{product.old_price | to_money}}</del>
                 </h4>
                 <div class="product-rating">
                   <i class="fa fa-star"></i>
@@ -252,8 +254,11 @@
                   </button>
                 </div>
               </div>
-              <div class="add-to-cart">
-                <button class="add-to-cart-btn">
+              <div class="js-container add-to-cart">
+                <input type="hidden" name="amount" value="1">
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+
+                <button class="js-add-to-cart add-to-cart-btn">
                   <i class="fa fa-shopping-cart"></i> add to cart
                 </button>
               </div>
